@@ -1,0 +1,52 @@
+cp /tmp/gen711_project_data/fastp.sh ~/fastp.sh
+
+chmod +x <path to github directory>/fastp.sh
+#trimming
+./fastp.sh 150 /tmp/gen711_project_data/fish/fastqs  trimmed_fastq
+ 
+
+conda activate qiime2-2022.8
+
+
+
+qiime tools import \
+   --type "SampleData[PairedEndSequencesWithQuality]"  \
+   --input-format CasavaOneEightSingleLanePerSampleDirFmt \
+   --input-path /home/users/bg1152/trimmed_fastq\
+   --output-path output/file
+
+qiime tools import \
+ --type "SampleData[PairedEndSequencesWithQuality]"  \
+  --input-format CasavaOneEightSingleLanePerSampleDirFmt \
+   --input-path /home/users/bg1152/trimmed_fastq \
+   --output-path /home/users/bg1152/output/fish.qza
+
+qiime cutadapt trim-paired \
+    --i-demultiplexed-sequences /home/users/bg1152/output/fish.qza \
+    --p-cores 4 \
+    --p-front-f GTCGGTAAAACTCGTGCCAGC \
+    --p-front-r CATAGTGGGGTATCTAATCCCAGTTTG \
+    --p-discard-untrimmed \
+    --p-match-adapter-wildcards \
+    --verbose \
+    --o-trimmed-sequences /home/users/bg1152/output/fish_cutadapt.qza
+
+
+qiime demux summarize \
+   --i-data /home/users/bg1152/output/fish_cutadapt.qza \
+   --o-visualization /home/users/bg1152/output/fish_demux.qzv
+   
+
+
+
+
+qiime dada2 denoise-paired \
+    --i-demultiplexed-seqs /home/users/bg1152/output/fish_cutadapt.qza \
+    --p-trunc-len-f  120 \
+    --p-trunc-len-r 115 \
+    --p-trim-left-f 0 \
+    --p-trim-left-r 0 \
+    --p-n-threads 4 \
+    --o-denoising-stats output/denoising-stats-1.qza \
+    --o-table output/feature_table-1.qza \
+    --o-representative-sequences output/rep-seqs-1.qza
