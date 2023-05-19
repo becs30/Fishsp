@@ -19,4 +19,6 @@ The figure represents a barplot detailing diversity in each taken sample
 #### Analysis
 The Squamscott River has more diverse fish population compared to the Oyster River if all samples are to be considered. But looking at the data closely, one can see there are a lot of unassigned species of fish in the Oyster River, and that hinders the quality of the analysis. We also note that the Cyprinodontiformes fish are the most abundant in Squamscott, with also a lot of unassigned fish. The amount of unassigned species of fish might be due to mutations in their mitochondrial 16S ribosomal RNA or they could be species never sequenced before. But relying solely on species we know their 16s Squamscott river has more fish diversity. 
 
+### Project Reproducibility
+Here are the codes used to generate this graph. 
 
