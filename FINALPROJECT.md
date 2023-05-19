@@ -22,3 +22,88 @@ The Squamscott River has more diverse fish population compared to the Oyster Riv
 ### Project Reproducibility
 Here are the codes used to generate this graph. 
 
+#Setting up commands 
+cp /tmp/gen711_project_data/fastp.sh ~/fastp.sh
+
+chmod +x <path to github directory>/fastp.sh
+
+#trimming
+./fastp.sh 150 /tmp/gen711_project_data/fish/fastqs  trimmed_fastq
+ 
+#Activating qiime
+conda activate qiime2-2022.8
+  
+#Importing file to qiime
+
+qiime tools import \
+ --type "SampleData[PairedEndSequencesWithQuality]"  \
+  --input-format CasavaOneEightSingleLanePerSampleDirFmt \
+   --input-path /home/users/bg1152/trimmed_fastq \
+   --output-path /home/users/bg1152/output/fish.qza
+
+# Primers and adapters removal
+qiime cutadapt trim-paired \
+    --i-demultiplexed-sequences /home/users/bg1152/output/fish.qza \
+    --p-cores 4 \
+    --p-front-f GTCGGTAAAACTCGTGCCAGC \
+    --p-front-r CATAGTGGGGTATCTAATCCCAGTTTG \
+    --p-discard-untrimmed \
+    --p-match-adapter-wildcards \
+    --verbose \
+    --o-trimmed-sequences /home/users/bg1152/output/fish_cutadapt.qza
+
+
+qiime demux summarize \
+   --i-data /home/users/bg1152/output/fish_cutadapt.qza \
+   --o-visualization /home/users/bg1152/output/fish_demux.qzv
+
+
+# DENOISING
+
+qiime dada2 denoise-paired \
+    --i-demultiplexed-seqs /home/users/bg1152/output/fish_cutadapt.qza \
+    --p-trunc-len-f  120 \
+    --p-trunc-len-r 115 \
+    --p-trim-left-f 0 \
+    --p-trim-left-r 0 \
+    --p-n-threads 4 \
+    --o-denoising-stats output/denoising-stats-1.qza \
+    --o-table output/feature_table-1.qza \
+    --o-representative-sequences output/rep-seqs-1.qza
+
+qiime metadata tabulate \
+    --m-input-file /home/users/bg1152/output/denoising-stats-1.qza \
+    --o-visualization /home/users/bg1152/output/denoising-stats.qzv
+
+ qiime feature-table tabulate-seqs \
+        --i-data /home/users/bg1152/output/rep-seqs-1.qza \
+        --o-visualization /home/users/bg1152/output/rep-seqs.qzv
+
+ #Taxonomy assignment 
+qiime feature-classifier classify-consensus-vsearch \
+  --i-query /home/users/bg1152/output/rep-seqs-1.qza \
+  --i-reference-reads /tmp/gen711_project_data/reference_databases/12S-seqs-derep-uniq.qza \
+  --i-reference-taxonomy /tmp/gen711_project_data/reference_databases/12S-tax-derep-uniq.qza \
+  --p-maxaccepts 10 \
+  --p-query-cov 0.80 \
+  --p-perc-identity 0.9 \
+  --p-threads 36 \
+  --o-classification /home/users/bg1152/output/taxonomy.qza
+
+        ### Barplot 
+qiime taxa barplot \
+     --i-table /home/users/bg1152/output/feature_table-1.qza \
+     --i-taxonomy /home/users/bg1152/output/taxonomy.qza \
+     --o-visualization /home/users/bg1152/output/my-barplot.qzv
+
+# Metadata and background info
+qiime feature-table filter-samples \
+  --i-table feature_table.qza \
+  --m-metadata-file metadata.tsv \
+  --o-filtered-table feature_table_filtered.qza
+
+qiime taxa barplot \
+     --i-table feature_table_filtered.qza \
+     --m-metadata-file sample-metadata.tsv \
+     --i-taxonomy taxonomy.qza \
+     --o-visualization filtered-barplot.qzv
