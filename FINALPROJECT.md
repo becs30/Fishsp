@@ -27,18 +27,18 @@ Yamamoto, Satoshi, et al. “Environmental DNA Metabarcoding Reveals Local Fish 
 ### Project Reproducibility
 Here are the codes used to generate this graph. 
 
-#Setting up commands 
+###### Setting up commands 
 cp /tmp/gen711_project_data/fastp.sh ~/fastp.sh
 
 chmod +x <path to github directory>/fastp.sh
 
-#####trimming
+###### trimming
 ./fastp.sh 150 /tmp/gen711_project_data/fish/fastqs  trimmed_fastq
  
 ##### Activating qiime
 conda activate qiime2-2022.8
   
-###### Importing file to qiime
+##### Importing file to qiime
 
 qiime tools import \
  --type "SampleData[PairedEndSequencesWithQuality]"  \
@@ -46,7 +46,7 @@ qiime tools import \
    --input-path /home/users/bg1152/trimmed_fastq \
    --output-path /home/users/bg1152/output/fish.qza
 
-###### Primers and adapters removal
+##### Primers and adapters removal
 qiime cutadapt trim-paired \
     --i-demultiplexed-sequences /home/users/bg1152/output/fish.qza \
     --p-cores 4 \
@@ -63,7 +63,7 @@ qiime demux summarize \
    --o-visualization /home/users/bg1152/output/fish_demux.qzv
 
 
-###### DENOISING
+##### DENOISING
 
 qiime dada2 denoise-paired \
     --i-demultiplexed-seqs /home/users/bg1152/output/fish_cutadapt.qza \
@@ -84,7 +84,7 @@ qiime metadata tabulate \
         --i-data /home/users/bg1152/output/rep-seqs-1.qza \
         --o-visualization /home/users/bg1152/output/rep-seqs.qzv
 
- ######Taxonomy assignment 
+ ##### Taxonomy assignment 
 qiime feature-classifier classify-consensus-vsearch \
   --i-query /home/users/bg1152/output/rep-seqs-1.qza \
   --i-reference-reads /tmp/gen711_project_data/reference_databases/12S-seqs-derep-uniq.qza \
@@ -95,7 +95,7 @@ qiime feature-classifier classify-consensus-vsearch \
   --p-threads 36 \
   --o-classification /home/users/bg1152/output/taxonomy.qza
 
-        ######## Barplot 
+        ###### Barplot 
 qiime taxa barplot \
      --i-table /home/users/bg1152/output/feature_table-1.qza \
      --i-taxonomy /home/users/bg1152/output/taxonomy.qza \
