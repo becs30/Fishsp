@@ -1,5 +1,6 @@
-# Project title 
-## fish diversity comparison in US, New Hampshire Rivers using metabarcoding
+# Title: Fish diversity comparison in US, New Hampshire Rivers using metabarcoding
+
+## Author: Becaye Gueye
 
 
 #
